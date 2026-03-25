@@ -295,10 +295,10 @@ export async function listPublicAcademicFaculty({
   if (query) {
     andFilters.push({
       OR: [
-        { firstName: { contains: query, mode: 'insensitive' } },
-        { middleName: { contains: query, mode: 'insensitive' } },
-        { lastName: { contains: query, mode: 'insensitive' } },
-        { institutionalEmail: { contains: query, mode: 'insensitive' } },
+        { firstName: { contains: query} },
+        { middleName: { contains: query} },
+        { lastName: { contains: query} },
+        { institutionalEmail: { contains: query} },
       ],
     });
   }
@@ -324,8 +324,8 @@ export async function listPublicAcademicFaculty({
   if (filters.alpha) {
     andFilters.push({
       OR: [
-        { lastName: { startsWith: filters.alpha, mode: 'insensitive' } },
-        { firstName: { startsWith: filters.alpha, mode: 'insensitive' } },
+        { lastName: { startsWith: filters.alpha} },
+        { firstName: { startsWith: filters.alpha} },
       ],
     });
   }
@@ -439,10 +439,10 @@ export async function listPublicPeopleByCategory(
   if (query) {
     andFilters.push({
       OR: [
-        { firstName: { contains: query, mode: 'insensitive' } },
-        { middleName: { contains: query, mode: 'insensitive' } },
-        { lastName: { contains: query, mode: 'insensitive' } },
-        { institutionalEmail: { contains: query, mode: 'insensitive' } },
+        { firstName: { contains: query} },
+        { middleName: { contains: query} },
+        { lastName: { contains: query} },
+        { institutionalEmail: { contains: query} },
       ],
     });
   }
@@ -468,8 +468,8 @@ export async function listPublicPeopleByCategory(
   if (filters.alpha) {
     andFilters.push({
       OR: [
-        { lastName: { startsWith: filters.alpha, mode: 'insensitive' } },
-        { firstName: { startsWith: filters.alpha, mode: 'insensitive' } },
+        { lastName: { startsWith: filters.alpha} },
+        { firstName: { startsWith: filters.alpha} },
       ],
     });
   }

@@ -45,8 +45,7 @@ export async function requestPasswordResetLink(email: string) {
     const staff = await prisma.staff.findFirst({
       where: {
         institutionalEmail: {
-          equals: normalizedEmail,
-          mode: 'insensitive',
+          equals: normalizedEmail
         },
       },
       select: {

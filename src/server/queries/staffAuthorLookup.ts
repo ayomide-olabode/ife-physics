@@ -23,10 +23,10 @@ export async function searchStaffAuthors(q: string, take = 10): Promise<StaffAut
     where: {
       deletedAt: null,
       OR: [
-        { institutionalEmail: { contains: trimmed, mode: 'insensitive' } },
-        { firstName: { contains: trimmed, mode: 'insensitive' } },
-        { middleName: { contains: trimmed, mode: 'insensitive' } },
-        { lastName: { contains: trimmed, mode: 'insensitive' } },
+        { institutionalEmail: { contains: trimmed} },
+        { firstName: { contains: trimmed} },
+        { middleName: { contains: trimmed} },
+        { lastName: { contains: trimmed} },
       ],
     },
     select: {

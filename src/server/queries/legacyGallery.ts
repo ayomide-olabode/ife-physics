@@ -16,9 +16,9 @@ export async function listLegacyGallery(params: {
 
   if (q) {
     where.OR = [
-      { title: { contains: q, mode: 'insensitive' } },
-      { bioText: { contains: q, mode: 'insensitive' } },
-      { datesText: { contains: q, mode: 'insensitive' } },
+      { title: { contains: q} },
+      { bioText: { contains: q} },
+      { datesText: { contains: q} },
     ];
   }
 

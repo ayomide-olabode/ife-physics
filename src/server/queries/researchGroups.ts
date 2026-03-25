@@ -28,8 +28,8 @@ export async function listResearchGroupsForUser({
 
   if (q) {
     where.OR = [
-      { name: { contains: q, mode: 'insensitive' } },
-      { abbreviation: { contains: q, mode: 'insensitive' } },
+      { name: { contains: q} },
+      { abbreviation: { contains: q} },
     ];
   }
 

@@ -22,8 +22,7 @@ export async function completeRegistration({
     const staff = await prisma.staff.findFirst({
       where: {
         institutionalEmail: {
-          equals: email,
-          mode: 'insensitive',
+          equals: email
         },
       },
     });

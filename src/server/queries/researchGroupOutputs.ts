@@ -47,15 +47,30 @@ export async function listResearchOutputsForGroupMembers({
     };
   }
 
+  const authorsMembershipClause =
+    staffIds.length > 0
+      ? Prisma.sql`(
+          ${Prisma.join(
+            staffIds.map(
+              (staffId) =>
+                Prisma.sql`JSON_CONTAINS(COALESCE(r.\`authorsJson\`, JSON_ARRAY()), JSON_OBJECT('staffId', ${staffId}), '$')`,
+            ),
+            ' OR ',
+          )}
+        )`
+      : Prisma.sql`FALSE`;
+
+  const searchPattern = `%${query.toLowerCase()}%`;
+
   const searchClause =
     query.length > 0
       ? Prisma.sql`
           AND (
-            r.title ILIKE ${`%${query}%`}
-            OR COALESCE(r.authors, '') ILIKE ${`%${query}%`}
-            OR COALESCE(r.doi, '') ILIKE ${`%${query}%`}
-            OR COALESCE(r.year::text, '') ILIKE ${`%${query}%`}
-            OR COALESCE(r.type::text, '') ILIKE ${`%${query}%`}
+            LOWER(r.title) LIKE ${searchPattern}
+            OR LOWER(COALESCE(r.authors, '')) LIKE ${searchPattern}
+            OR LOWER(COALESCE(r.doi, '')) LIKE ${searchPattern}
+            OR LOWER(COALESCE(CAST(r.year AS CHAR), '')) LIKE ${searchPattern}
+            OR LOWER(COALESCE(r.type, '')) LIKE ${searchPattern}
           )
         `
       : Prisma.empty;
@@ -72,47 +87,31 @@ export async function listResearchOutputsForGroupMembers({
     }[]
   >`
     SELECT
-      deduped.id,
-      deduped."outputType",
-      deduped.title,
-      deduped."authorsDisplay",
-      deduped.year,
-      deduped.doi,
-      deduped."createdAt"
-    FROM (
-      SELECT DISTINCT ON (r.id)
-        r.id,
-        r.type as "outputType",
-        r.title,
-        COALESCE(NULLIF(BTRIM(r.authors), ''), 'Unknown author(s)') as "authorsDisplay",
-        r.year,
-        r.doi,
-        r."createdAt"
-      FROM "ResearchOutput" r,
-           jsonb_array_elements(COALESCE(r."authorsJson", '[]'::jsonb)) as a
-      WHERE r."deletedAt" IS NULL
-        AND (a->>'staffId' IN (${Prisma.join(staffIds)}))
-        ${searchClause}
-      ORDER BY r.id, r.year DESC NULLS LAST, r."createdAt" DESC
-    ) deduped
-    ORDER BY deduped.year DESC NULLS LAST, deduped."createdAt" DESC
+      r.id,
+      r.type as outputType,
+      r.title,
+      COALESCE(NULLIF(TRIM(r.authors), ''), 'Unknown author(s)') as authorsDisplay,
+      r.year,
+      r.doi,
+      r.\`createdAt\` as createdAt
+    FROM \`ResearchOutput\` r
+    WHERE r.\`deletedAt\` IS NULL
+      AND ${authorsMembershipClause}
+      ${searchClause}
+    ORDER BY (r.year IS NULL) ASC, r.year DESC, r.\`createdAt\` DESC
     LIMIT ${effectivePageSize}
     OFFSET ${offset};
   `;
 
-  const countRows = await prisma.$queryRaw<{ total: number }[]>`
-    SELECT COUNT(*)::int as total
-    FROM (
-      SELECT DISTINCT r.id
-      FROM "ResearchOutput" r,
-           jsonb_array_elements(COALESCE(r."authorsJson", '[]'::jsonb)) as a
-      WHERE r."deletedAt" IS NULL
-        AND (a->>'staffId' IN (${Prisma.join(staffIds)}))
-        ${searchClause}
-    ) deduped;
+  const countRows = await prisma.$queryRaw<{ total: bigint | number }[]>`
+    SELECT COUNT(*) as total
+    FROM \`ResearchOutput\` r
+    WHERE r.\`deletedAt\` IS NULL
+      AND ${authorsMembershipClause}
+      ${searchClause};
   `;
 
-  const totalCount = countRows[0]?.total ?? 0;
+  const totalCount = Number(countRows[0]?.total ?? 0);
   const totalPages = totalCount > 0 ? Math.ceil(totalCount / effectivePageSize) : 0;
 
   return {

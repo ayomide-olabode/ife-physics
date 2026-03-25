@@ -28,7 +28,7 @@ export async function listProgramStudyOptions({
     where.studyOption = {
       is: {
         deletedAt: null,
-        name: { contains: q, mode: 'insensitive' },
+        name: { contains: q},
       },
     };
   }

@@ -188,7 +188,7 @@ export async function lookupCourseByCode({
 }) {
   return prisma.course.findMany({
     where: {
-      code: { startsWith: codePrefix, mode: 'insensitive' },
+      code: { startsWith: codePrefix},
       program: {
         programmeCode,
         level: 'POSTGRADUATE',

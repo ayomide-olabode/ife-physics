@@ -56,12 +56,10 @@ export async function listPublicEventOpportunities({
       const query = q.trim();
       andClauses.push({
         OR: [
-          { title: { contains: query, mode: 'insensitive' } },
-          { description: { contains: query, mode: 'insensitive' } },
-          ...(includeDurationSearch
-            ? [{ duration: { contains: query, mode: Prisma.QueryMode.insensitive } }]
-            : []),
-          { venue: { contains: query, mode: 'insensitive' } },
+          { title: { contains: query} },
+          { description: { contains: query} },
+          ...(includeDurationSearch ? [{ duration: { contains: query } }] : []),
+          { venue: { contains: query} },
         ],
       });
     }

@@ -9,10 +9,10 @@ export async function searchStaff({ q, take = 20 }: { q: string; take?: number }
     where: {
       deletedAt: null,
       OR: [
-        { firstName: { contains: q, mode: 'insensitive' } },
-        { middleName: { contains: q, mode: 'insensitive' } },
-        { lastName: { contains: q, mode: 'insensitive' } },
-        { institutionalEmail: { contains: q, mode: 'insensitive' } },
+        { firstName: { contains: q} },
+        { middleName: { contains: q} },
+        { lastName: { contains: q} },
+        { institutionalEmail: { contains: q} },
       ],
     },
     select: {

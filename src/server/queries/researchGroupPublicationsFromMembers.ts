@@ -25,7 +25,16 @@ export async function listRecentResearchOutputsForGroupMembers({
   const staffIds = await getResearchGroupMemberStaffIds(groupId);
   if (staffIds.length === 0) return [];
 
-  // Using jsonb_array_elements on authorsJson safely (coalesce to empty array if null).
+  const authorsMembershipClause = Prisma.sql`(
+    ${Prisma.join(
+      staffIds.map(
+        (staffId) =>
+          Prisma.sql`JSON_CONTAINS(COALESCE(r.\`authorsJson\`, JSON_ARRAY()), JSON_OBJECT('staffId', ${staffId}), '$')`,
+      ),
+      ' OR ',
+    )}
+  )`;
+
   const researchOutputs = await prisma.$queryRaw<
     {
       id: string;
@@ -40,12 +49,21 @@ export async function listRecentResearchOutputsForGroupMembers({
       type: string;
     }[]
   >`
-    SELECT DISTINCT r.id, r.title, r.year, r."sourceTitle", r.publisher, r.venue, r.doi, r.url, r."updatedAt", r.type
-    FROM "ResearchOutput" r,
-         jsonb_array_elements(COALESCE(r."authorsJson", '[]'::jsonb)) as a
-    WHERE r."deletedAt" IS NULL
-      AND (a->>'staffId' IN (${Prisma.join(staffIds)}))
-    ORDER BY r.year DESC NULLS LAST, r."updatedAt" DESC
+    SELECT
+      r.id,
+      r.title,
+      r.year,
+      r.\`sourceTitle\` as sourceTitle,
+      r.publisher,
+      r.venue,
+      r.doi,
+      r.url,
+      r.\`updatedAt\` as updatedAt,
+      r.type
+    FROM \`ResearchOutput\` r
+    WHERE r.\`deletedAt\` IS NULL
+      AND ${authorsMembershipClause}
+    ORDER BY (r.year IS NULL) ASC, r.year DESC, r.\`updatedAt\` DESC
     LIMIT ${take};
   `;
 

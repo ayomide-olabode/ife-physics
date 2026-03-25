@@ -49,7 +49,7 @@ export async function linkAuthorsToStaff(input: z.infer<typeof inputSchema>) {
   }
 
   const whereLastName = queryLastNames.map((lastName) => ({
-    lastName: { equals: lastName, mode: 'insensitive' as const },
+    lastName: { equals: lastName},
   }));
 
   const staffCandidates: StaffNameCandidate[] = await prisma.staff.findMany({

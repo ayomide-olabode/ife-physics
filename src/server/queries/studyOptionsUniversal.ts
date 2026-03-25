@@ -16,8 +16,8 @@ export async function listAllStudyOptions({
     ...(q
       ? {
           OR: [
-            { name: { contains: q, mode: 'insensitive' as const } },
-            { about: { contains: q, mode: 'insensitive' as const } },
+            { name: { contains: q} },
+            { about: { contains: q} },
           ],
         }
       : {}),

@@ -8,8 +8,8 @@ export async function searchCoursesUniversal(q: string, take = 10) {
   const courses = await prisma.course.findMany({
     where: {
       OR: [
-        { code: { contains: q, mode: 'insensitive' } },
-        { title: { contains: q, mode: 'insensitive' } },
+        { code: { contains: q} },
+        { title: { contains: q} },
       ],
     },
     select: {

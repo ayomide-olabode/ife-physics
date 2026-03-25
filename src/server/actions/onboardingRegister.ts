@@ -60,12 +60,9 @@ export async function requestRegistrationLink(email: string): Promise<RequestReg
   }
 
   try {
-    let staff = await prisma.staff.findFirst({
+    let staff = await prisma.staff.findUnique({
       where: {
-        institutionalEmail: {
-          equals: normalizedEmail,
-          mode: 'insensitive',
-        },
+        institutionalEmail: normalizedEmail,
       },
     });
 
@@ -223,12 +220,9 @@ export async function completeRegistration(
     }
 
     if (!user) {
-      const staff = await prisma.staff.findFirst({
+      const staff = await prisma.staff.findUnique({
         where: {
-          institutionalEmail: {
-            equals: inviteToken.email,
-            mode: 'insensitive',
-          },
+          institutionalEmail: inviteToken.email,
         },
         select: { id: true },
       });

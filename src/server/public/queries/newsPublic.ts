@@ -46,8 +46,8 @@ export async function listPublicNews(
   if (q) {
     andClauses.push({
       OR: [
-        { title: { contains: q, mode: 'insensitive' } },
-        { body: { contains: q, mode: 'insensitive' } },
+        { title: { contains: q} },
+        { body: { contains: q} },
       ],
     });
   }

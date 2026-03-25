@@ -200,23 +200,33 @@ export async function listPublicRecentOutputsForGroup(
     return { items: [], total: 0, page, pageSize, hasMore: false };
   }
 
+  const authorsMembershipClause = Prisma.sql`(
+    ${Prisma.join(
+      staffIds.map(
+        (staffId) =>
+          Prisma.sql`JSON_CONTAINS(COALESCE(r.\`authorsJson\`, JSON_ARRAY()), JSON_OBJECT('staffId', ${staffId}), '$')`,
+      ),
+      ' OR ',
+    )}
+  )`;
+
+  const searchPattern = `%${q.toLowerCase()}%`;
+
   const searchClause =
     q.length > 0
       ? Prisma.sql`
           AND (
-            r.title ILIKE ${`%${q}%`}
-            OR COALESCE(r.authors, '') ILIKE ${`%${q}%`}
-            OR COALESCE(r."sourceTitle", '') ILIKE ${`%${q}%`}
-            OR COALESCE(r.publisher, '') ILIKE ${`%${q}%`}
-            OR COALESCE(r.venue, '') ILIKE ${`%${q}%`}
-            OR COALESCE(r.year::text, '') ILIKE ${`%${q}%`}
+            LOWER(r.title) LIKE ${searchPattern}
+            OR LOWER(COALESCE(r.authors, '')) LIKE ${searchPattern}
+            OR LOWER(COALESCE(r.\`sourceTitle\`, '')) LIKE ${searchPattern}
+            OR LOWER(COALESCE(r.publisher, '')) LIKE ${searchPattern}
+            OR LOWER(COALESCE(r.venue, '')) LIKE ${searchPattern}
+            OR LOWER(COALESCE(CAST(r.year AS CHAR), '')) LIKE ${searchPattern}
           )
         `
       : Prisma.empty;
 
-  const outputTypeClause = outputType
-    ? Prisma.sql`AND r.type = ${outputType}::"ResearchOutputType"`
-    : Prisma.empty;
+  const outputTypeClause = outputType ? Prisma.sql`AND r.type = ${outputType}` : Prisma.empty;
 
   const researchOutputs = await prisma.$queryRaw<
     {
@@ -236,61 +246,43 @@ export async function listPublicRecentOutputsForGroup(
     }[]
   >`
     SELECT
-      deduped.id,
-      deduped.title,
-      deduped.year,
-      deduped."fullDate",
-      deduped."outputType",
-      deduped.authors,
-      deduped."sourceTitle",
-      deduped.venue,
-      deduped.publisher,
-      deduped."metaJson",
-      deduped."authorsJson",
-      deduped.doi,
-      deduped.url
-    FROM (
-      SELECT DISTINCT ON (r.id)
-        r.id,
-        r.title,
-        r.year,
-        r."fullDate",
-        r.type as "outputType",
-        COALESCE(NULLIF(BTRIM(r.authors), ''), 'Unknown author(s)') as authors,
-        r."sourceTitle",
-        r.venue,
-        r.publisher,
-        r."metaJson",
-        r."authorsJson",
-        r.doi,
-        r.url,
-        r."updatedAt"
-      FROM "ResearchOutput" r,
-           jsonb_array_elements(COALESCE(r."authorsJson", '[]'::jsonb)) as a
-      WHERE r."deletedAt" IS NULL
-        AND (a->>'staffId' IN (${Prisma.join(staffIds)}))
-        ${outputTypeClause}
-        ${searchClause}
-      ORDER BY r.id, r."fullDate" DESC NULLS LAST, r.year DESC NULLS LAST, r."updatedAt" DESC
-    ) as deduped
-    ORDER BY deduped."fullDate" DESC NULLS LAST, deduped.year DESC NULLS LAST, deduped."updatedAt" DESC
+      r.id,
+      r.title,
+      r.year,
+      r.\`fullDate\` as fullDate,
+      r.type as outputType,
+      COALESCE(NULLIF(TRIM(r.authors), ''), 'Unknown author(s)') as authors,
+      r.\`sourceTitle\` as sourceTitle,
+      r.venue,
+      r.publisher,
+      r.\`metaJson\` as metaJson,
+      r.\`authorsJson\` as authorsJson,
+      r.doi,
+      r.url
+    FROM \`ResearchOutput\` r
+    WHERE r.\`deletedAt\` IS NULL
+      AND ${authorsMembershipClause}
+      ${outputTypeClause}
+      ${searchClause}
+    ORDER BY
+      (r.\`fullDate\` IS NULL) ASC,
+      r.\`fullDate\` DESC,
+      (r.year IS NULL) ASC,
+      r.year DESC,
+      r.\`updatedAt\` DESC
     LIMIT ${pageSize}
     OFFSET ${offset};
   `;
 
-  const countRows = await prisma.$queryRaw<{ total: number }[]>`
-    SELECT COUNT(*)::int as total
-    FROM (
-      SELECT DISTINCT r.id
-      FROM "ResearchOutput" r,
-           jsonb_array_elements(COALESCE(r."authorsJson", '[]'::jsonb)) as a
-      WHERE r."deletedAt" IS NULL
-        AND (a->>'staffId' IN (${Prisma.join(staffIds)}))
-        ${outputTypeClause}
-        ${searchClause}
-    ) as deduped;
+  const countRows = await prisma.$queryRaw<{ total: bigint | number }[]>`
+    SELECT COUNT(*) as total
+    FROM \`ResearchOutput\` r
+    WHERE r.\`deletedAt\` IS NULL
+      AND ${authorsMembershipClause}
+      ${outputTypeClause}
+      ${searchClause};
   `;
-  const total = countRows[0]?.total ?? 0;
+  const total = Number(countRows[0]?.total ?? 0);
   const authorStaffIds = Array.from(
     new Set(
       researchOutputs.flatMap((output) =>

@@ -15,8 +15,8 @@ export async function listSecondaryAffiliations({
   const where: Prisma.SecondaryAffiliationWhereInput = q
     ? {
         OR: [
-          { name: { contains: q, mode: 'insensitive' } },
-          { acronym: { contains: q, mode: 'insensitive' } },
+          { name: { contains: q} },
+          { acronym: { contains: q} },
         ],
       }
     : {};

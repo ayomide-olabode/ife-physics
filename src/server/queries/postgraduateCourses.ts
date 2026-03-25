@@ -25,8 +25,8 @@ export async function listPostgraduateCourses({
 
   if (q) {
     where.OR = [
-      { code: { contains: q, mode: 'insensitive' } },
-      { title: { contains: q, mode: 'insensitive' } },
+      { code: { contains: q} },
+      { title: { contains: q} },
     ];
   }
 
@@ -77,8 +77,8 @@ export async function searchPostgraduateCourses({
 
   if (q) {
     where.OR = [
-      { code: { contains: q, mode: 'insensitive' } },
-      { title: { contains: q, mode: 'insensitive' } },
+      { code: { contains: q} },
+      { title: { contains: q} },
     ];
   }
 

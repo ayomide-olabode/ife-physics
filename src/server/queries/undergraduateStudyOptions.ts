@@ -25,7 +25,7 @@ export async function listStudyOptions({
   };
 
   if (q) {
-    where.name = { contains: q, mode: 'insensitive' };
+    where.name = { contains: q};
   }
 
   const [items, total] = await Promise.all([

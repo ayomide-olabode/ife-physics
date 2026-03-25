@@ -15,10 +15,10 @@ export async function listStaff({
   const where: Prisma.StaffWhereInput = q
     ? {
         OR: [
-          { firstName: { contains: q, mode: 'insensitive' } },
-          { middleName: { contains: q, mode: 'insensitive' } },
-          { lastName: { contains: q, mode: 'insensitive' } },
-          { institutionalEmail: { contains: q, mode: 'insensitive' } },
+          { firstName: { contains: q} },
+          { middleName: { contains: q} },
+          { lastName: { contains: q} },
+          { institutionalEmail: { contains: q} },
         ],
       }
     : {};

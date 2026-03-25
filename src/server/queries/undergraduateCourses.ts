@@ -25,8 +25,8 @@ export async function listUndergraduateCourses({
 
   if (q) {
     where.OR = [
-      { code: { contains: q, mode: 'insensitive' } },
-      { title: { contains: q, mode: 'insensitive' } },
+      { code: { contains: q} },
+      { title: { contains: q} },
     ];
   }
 
@@ -78,8 +78,8 @@ export async function searchCourses({
 
   if (q) {
     where.OR = [
-      { code: { contains: q, mode: 'insensitive' } },
-      { title: { contains: q, mode: 'insensitive' } },
+      { code: { contains: q} },
+      { title: { contains: q} },
     ];
   }
 

@@ -17,8 +17,8 @@ export async function listSpotlight({
   if (status) where.status = status;
   if (q) {
     where.OR = [
-      { title: { contains: q, mode: 'insensitive' } },
-      { text: { contains: q, mode: 'insensitive' } },
+      { title: { contains: q} },
+      { text: { contains: q} },
     ];
   }
 

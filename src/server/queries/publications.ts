@@ -23,9 +23,9 @@ export async function listPublicationsForGroup({
 
   if (q) {
     where.OR = [
-      { title: { contains: q, mode: 'insensitive' } },
-      { authors: { contains: q, mode: 'insensitive' } },
-      { venue: { contains: q, mode: 'insensitive' } },
+      { title: { contains: q} },
+      { authors: { contains: q} },
+      { venue: { contains: q} },
     ];
   }
 

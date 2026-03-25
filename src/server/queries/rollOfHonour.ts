@@ -20,12 +20,12 @@ export async function listRollOfHonour({
 
   if (q) {
     where.OR = [
-      { name: { contains: q, mode: 'insensitive' } },
-      { firstName: { contains: q, mode: 'insensitive' } },
-      { middleName: { contains: q, mode: 'insensitive' } },
-      { lastName: { contains: q, mode: 'insensitive' } },
-      { registrationNumber: { contains: q, mode: 'insensitive' } },
-      { programme: { contains: q, mode: 'insensitive' } },
+      { name: { contains: q} },
+      { firstName: { contains: q} },
+      { middleName: { contains: q} },
+      { lastName: { contains: q} },
+      { registrationNumber: { contains: q} },
+      { programme: { contains: q} },
     ];
   }
 
@@ -34,7 +34,7 @@ export async function listRollOfHonour({
   }
 
   if (programme) {
-    where.programme = { equals: programme, mode: 'insensitive' };
+    where.programme = { equals: programme};
   }
 
   const [data, total] = await Promise.all([

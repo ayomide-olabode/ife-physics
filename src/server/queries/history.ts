@@ -18,8 +18,8 @@ export async function listHistory({
 
   if (q) {
     where.OR = [
-      { title: { contains: q, mode: 'insensitive' } },
-      { shortDesc: { contains: q, mode: 'insensitive' } },
+      { title: { contains: q} },
+      { shortDesc: { contains: q} },
     ];
   }
 
