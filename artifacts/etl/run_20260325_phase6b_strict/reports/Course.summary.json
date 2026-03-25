@@ -1,0 +1,9 @@
+{
+  "loadedRows": 8,
+  "preConflictValidRows": 8,
+  "quarantinedRows": 0,
+  "rejects": 0,
+  "sourceRows": 8,
+  "table": "Course",
+  "validRows": 8
+}

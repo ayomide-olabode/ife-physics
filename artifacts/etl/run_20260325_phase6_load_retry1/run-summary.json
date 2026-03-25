@@ -1,0 +1,35 @@
+{
+  "endedAt": "2026-03-25T16:02:57.049Z",
+  "failures": [
+    {
+      "message": "Rejects found for table RoleAssignment and failOnRejects=true. See reports/rejects/RoleAssignment.ndjson",
+      "name": "Error",
+      "stack": "Error: Rejects found for table RoleAssignment and failOnRejects=true. See reports/rejects/RoleAssignment.ndjson\n    at run (/home/io/Sandbox/ife-physics/scripts/etl/rehearsal.js:411:17)"
+    }
+  ],
+  "postLoadValidation": {},
+  "startedAt": "2026-03-25T16:02:56.954Z",
+  "tableSummaries": [
+    {
+      "loadedRows": 1,
+      "rejects": 0,
+      "sourceRows": 1,
+      "table": "SecondaryAffiliation",
+      "validRows": 1
+    },
+    {
+      "loadedRows": 9,
+      "rejects": 0,
+      "sourceRows": 9,
+      "table": "Staff",
+      "validRows": 9
+    },
+    {
+      "loadedRows": 9,
+      "rejects": 0,
+      "sourceRows": 9,
+      "table": "User",
+      "validRows": 9
+    }
+  ]
+}

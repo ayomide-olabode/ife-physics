@@ -1,0 +1,138 @@
+{
+  "SecondaryAffiliation": {
+    "sourceCount": 1,
+    "targetCount": 1
+  },
+  "Staff": {
+    "sourceCount": 9,
+    "targetCount": 9
+  },
+  "User": {
+    "sourceCount": 9,
+    "targetCount": 9
+  },
+  "RoleAssignment": {
+    "sourceCount": 15,
+    "targetCount": 10
+  },
+  "LeadershipTerm": {
+    "sourceCount": 5,
+    "targetCount": 5
+  },
+  "HodAddress": {
+    "sourceCount": 1,
+    "targetCount": 1
+  },
+  "DepartmentalTribute": {
+    "sourceCount": 1,
+    "targetCount": 1
+  },
+  "TributeTestimonial": {
+    "sourceCount": 4,
+    "targetCount": 4
+  },
+  "ResearchGroup": {
+    "sourceCount": 4,
+    "targetCount": 4
+  },
+  "FocusArea": {
+    "sourceCount": 4,
+    "targetCount": 4
+  },
+  "ResearchOutput": {
+    "sourceCount": 6,
+    "targetCount": 6
+  },
+  "Project": {
+    "sourceCount": 3,
+    "targetCount": 3
+  },
+  "TeachingResponsibility": {
+    "sourceCount": 4,
+    "targetCount": 4
+  },
+  "StudentThesis": {
+    "sourceCount": 2,
+    "targetCount": 2
+  },
+  "Publication": {
+    "sourceCount": 0,
+    "targetCount": 0
+  },
+  "PublicationAuthor": {
+    "sourceCount": 0,
+    "targetCount": 0
+  },
+  "ResearchGroupMembership": {
+    "sourceCount": 2,
+    "targetCount": 2
+  },
+  "StaffFocusAreaSelection": {
+    "sourceCount": 1,
+    "targetCount": 1
+  },
+  "AcademicProgram": {
+    "sourceCount": 6,
+    "targetCount": 6
+  },
+  "PgDegreeContent": {
+    "sourceCount": 1,
+    "targetCount": 1
+  },
+  "StudyOption": {
+    "sourceCount": 6,
+    "targetCount": 6
+  },
+  "Course": {
+    "sourceCount": 8,
+    "targetCount": 8
+  },
+  "RequirementBlock": {
+    "sourceCount": 13,
+    "targetCount": 13
+  },
+  "ProgramStudyOption": {
+    "sourceCount": 9,
+    "targetCount": 9
+  },
+  "CourseOnStudyOption": {
+    "sourceCount": 2,
+    "targetCount": 2
+  },
+  "News": {
+    "sourceCount": 6,
+    "targetCount": 6
+  },
+  "EventOpportunity": {
+    "sourceCount": 5,
+    "targetCount": 5
+  },
+  "Spotlight": {
+    "sourceCount": 1,
+    "targetCount": 1
+  },
+  "HistoryEntry": {
+    "sourceCount": 7,
+    "targetCount": 7
+  },
+  "RollOfHonourEntry": {
+    "sourceCount": 2,
+    "targetCount": 2
+  },
+  "LegacyGalleryItem": {
+    "sourceCount": 1,
+    "targetCount": 1
+  },
+  "ResourceItem": {
+    "sourceCount": 0,
+    "targetCount": 0
+  },
+  "EmailToken": {
+    "sourceCount": 8,
+    "targetCount": 8
+  },
+  "AuditLog": {
+    "sourceCount": 292,
+    "targetCount": 292
+  }
+}

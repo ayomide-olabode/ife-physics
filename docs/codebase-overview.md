@@ -29,7 +29,7 @@ The system supports these major domains:
 
 - **Next.js 16 (App Router)** for routing, layouts, server components, and route handlers.
 - **React 19 + TypeScript** for UI and typed application code.
-- **Prisma + PostgreSQL** for ORM and relational data modeling.
+- **Prisma + MySQL** for ORM and relational data modeling.
 - **NextAuth (credentials provider)** for session-based authentication.
 - **Tailwind CSS + shadcn/ui + Radix UI** for design system and primitives.
 - **Zod** for server-side schema validation of action payloads.
@@ -195,11 +195,12 @@ Some routes are intentionally placeholder at the moment (for example parts of Sp
 
 ## 13. Local development notes
 
-- PostgreSQL runs via `docker-compose.yml`.
+- MySQL runs via `docker-compose.yml`.
 - Prisma client generation runs during `dev`/`build` lifecycle scripts.
+- PostgreSQL-era Prisma migration SQL is archived in `prisma/migrations_postgresql_archive/` and is not part of active lineage.
+- Active migration lineage is a fresh MySQL baseline from current `prisma/schema.prisma`.
 - Environment variables expected include:
   - `DATABASE_URL`
   - `NEXTAUTH_SECRET`
   - `NEXTAUTH_URL`
   - `APP_URL` (used for invite/reset link generation)
-

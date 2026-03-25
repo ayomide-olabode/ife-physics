@@ -1,0 +1,9 @@
+{
+  "loadedRows": 292,
+  "preConflictValidRows": 292,
+  "quarantinedRows": 0,
+  "rejects": 0,
+  "sourceRows": 292,
+  "table": "AuditLog",
+  "validRows": 292
+}

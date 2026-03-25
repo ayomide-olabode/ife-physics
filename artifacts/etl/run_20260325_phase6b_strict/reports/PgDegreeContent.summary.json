@@ -1,0 +1,9 @@
+{
+  "loadedRows": 1,
+  "preConflictValidRows": 1,
+  "quarantinedRows": 0,
+  "rejects": 0,
+  "sourceRows": 1,
+  "table": "PgDegreeContent",
+  "validRows": 1
+}

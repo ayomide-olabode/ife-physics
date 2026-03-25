@@ -1,0 +1,240 @@
+{
+  "SecondaryAffiliation": {
+    "expectedTargetCount": 1,
+    "quarantinedRows": 0,
+    "rejects": 0,
+    "sourceCount": 1,
+    "targetCount": 1
+  },
+  "Staff": {
+    "expectedTargetCount": 9,
+    "quarantinedRows": 0,
+    "rejects": 0,
+    "sourceCount": 9,
+    "targetCount": 9
+  },
+  "User": {
+    "expectedTargetCount": 9,
+    "quarantinedRows": 0,
+    "rejects": 0,
+    "sourceCount": 9,
+    "targetCount": 9
+  },
+  "RoleAssignment": {
+    "expectedTargetCount": 10,
+    "quarantinedRows": 5,
+    "rejects": 0,
+    "sourceCount": 15,
+    "targetCount": 10
+  },
+  "LeadershipTerm": {
+    "expectedTargetCount": 5,
+    "quarantinedRows": 0,
+    "rejects": 0,
+    "sourceCount": 5,
+    "targetCount": 5
+  },
+  "HodAddress": {
+    "expectedTargetCount": 1,
+    "quarantinedRows": 0,
+    "rejects": 0,
+    "sourceCount": 1,
+    "targetCount": 1
+  },
+  "DepartmentalTribute": {
+    "expectedTargetCount": 1,
+    "quarantinedRows": 0,
+    "rejects": 0,
+    "sourceCount": 1,
+    "targetCount": 1
+  },
+  "TributeTestimonial": {
+    "expectedTargetCount": 4,
+    "quarantinedRows": 0,
+    "rejects": 0,
+    "sourceCount": 4,
+    "targetCount": 4
+  },
+  "ResearchGroup": {
+    "expectedTargetCount": 4,
+    "quarantinedRows": 0,
+    "rejects": 0,
+    "sourceCount": 4,
+    "targetCount": 4
+  },
+  "FocusArea": {
+    "expectedTargetCount": 4,
+    "quarantinedRows": 0,
+    "rejects": 0,
+    "sourceCount": 4,
+    "targetCount": 4
+  },
+  "ResearchOutput": {
+    "expectedTargetCount": 6,
+    "quarantinedRows": 0,
+    "rejects": 0,
+    "sourceCount": 6,
+    "targetCount": 6
+  },
+  "Project": {
+    "expectedTargetCount": 3,
+    "quarantinedRows": 0,
+    "rejects": 0,
+    "sourceCount": 3,
+    "targetCount": 3
+  },
+  "TeachingResponsibility": {
+    "expectedTargetCount": 4,
+    "quarantinedRows": 0,
+    "rejects": 0,
+    "sourceCount": 4,
+    "targetCount": 4
+  },
+  "StudentThesis": {
+    "expectedTargetCount": 2,
+    "quarantinedRows": 0,
+    "rejects": 0,
+    "sourceCount": 2,
+    "targetCount": 2
+  },
+  "Publication": {
+    "expectedTargetCount": 0,
+    "quarantinedRows": 0,
+    "rejects": 0,
+    "sourceCount": 0,
+    "targetCount": 0
+  },
+  "PublicationAuthor": {
+    "expectedTargetCount": 0,
+    "quarantinedRows": 0,
+    "rejects": 0,
+    "sourceCount": 0,
+    "targetCount": 0
+  },
+  "ResearchGroupMembership": {
+    "expectedTargetCount": 2,
+    "quarantinedRows": 0,
+    "rejects": 0,
+    "sourceCount": 2,
+    "targetCount": 2
+  },
+  "StaffFocusAreaSelection": {
+    "expectedTargetCount": 1,
+    "quarantinedRows": 0,
+    "rejects": 0,
+    "sourceCount": 1,
+    "targetCount": 1
+  },
+  "AcademicProgram": {
+    "expectedTargetCount": 6,
+    "quarantinedRows": 0,
+    "rejects": 0,
+    "sourceCount": 6,
+    "targetCount": 6
+  },
+  "PgDegreeContent": {
+    "expectedTargetCount": 1,
+    "quarantinedRows": 0,
+    "rejects": 0,
+    "sourceCount": 1,
+    "targetCount": 1
+  },
+  "StudyOption": {
+    "expectedTargetCount": 6,
+    "quarantinedRows": 0,
+    "rejects": 0,
+    "sourceCount": 6,
+    "targetCount": 6
+  },
+  "Course": {
+    "expectedTargetCount": 8,
+    "quarantinedRows": 0,
+    "rejects": 0,
+    "sourceCount": 8,
+    "targetCount": 8
+  },
+  "RequirementBlock": {
+    "expectedTargetCount": 13,
+    "quarantinedRows": 0,
+    "rejects": 0,
+    "sourceCount": 13,
+    "targetCount": 13
+  },
+  "ProgramStudyOption": {
+    "expectedTargetCount": 9,
+    "quarantinedRows": 0,
+    "rejects": 0,
+    "sourceCount": 9,
+    "targetCount": 9
+  },
+  "CourseOnStudyOption": {
+    "expectedTargetCount": 2,
+    "quarantinedRows": 0,
+    "rejects": 0,
+    "sourceCount": 2,
+    "targetCount": 2
+  },
+  "News": {
+    "expectedTargetCount": 6,
+    "quarantinedRows": 0,
+    "rejects": 0,
+    "sourceCount": 6,
+    "targetCount": 6
+  },
+  "EventOpportunity": {
+    "expectedTargetCount": 5,
+    "quarantinedRows": 0,
+    "rejects": 0,
+    "sourceCount": 5,
+    "targetCount": 5
+  },
+  "Spotlight": {
+    "expectedTargetCount": 1,
+    "quarantinedRows": 0,
+    "rejects": 0,
+    "sourceCount": 1,
+    "targetCount": 1
+  },
+  "HistoryEntry": {
+    "expectedTargetCount": 7,
+    "quarantinedRows": 0,
+    "rejects": 0,
+    "sourceCount": 7,
+    "targetCount": 7
+  },
+  "RollOfHonourEntry": {
+    "expectedTargetCount": 2,
+    "quarantinedRows": 0,
+    "rejects": 0,
+    "sourceCount": 2,
+    "targetCount": 2
+  },
+  "LegacyGalleryItem": {
+    "expectedTargetCount": 1,
+    "quarantinedRows": 0,
+    "rejects": 0,
+    "sourceCount": 1,
+    "targetCount": 1
+  },
+  "ResourceItem": {
+    "expectedTargetCount": 0,
+    "quarantinedRows": 0,
+    "rejects": 0,
+    "sourceCount": 0,
+    "targetCount": 0
+  },
+  "EmailToken": {
+    "expectedTargetCount": 8,
+    "quarantinedRows": 0,
+    "rejects": 0,
+    "sourceCount": 8,
+    "targetCount": 8
+  },
+  "AuditLog": {
+    "expectedTargetCount": 292,
+    "quarantinedRows": 0,
+    "rejects": 0,
+    "sourceCount": 292,
+    "targetCount": 292
+  }
+}

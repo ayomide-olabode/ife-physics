@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -176,7 +176,7 @@ model SecondaryAffiliation {
   id          String  @id @default(cuid())
   name        String
   acronym     String?
-  description String?
+  description String? @db.Text
 
   staff Staff[]
 
@@ -215,16 +215,16 @@ model Staff {
   operationalUnit String?
   areaOfExpertise String?
 
-  phoneNumber       String?
-  bio               String?
-  education         String?
-  researchInterests String?
-  membershipOfProfessionalOrganizations String?
-  profileImageUrl   String?
-  dateOfBirth       DateTime?
-  dateOfDeath       DateTime?
-  isInMemoriam      Boolean @default(false)
-  isPublicProfile   Boolean @default(true)
+  phoneNumber                           String?
+  bio                                   String?   @db.LongText
+  education                             String?   @db.LongText
+  researchInterests                     String?   @db.LongText
+  membershipOfProfessionalOrganizations String?   @db.LongText
+  profileImageUrl                       String?
+  dateOfBirth                           DateTime?
+  dateOfDeath                           DateTime?
+  isInMemoriam                          Boolean   @default(false)
+  isPublicProfile                       Boolean   @default(true)
 
   user        User?
   emailTokens EmailToken[]
@@ -258,7 +258,7 @@ model DepartmentalTribute {
   id        String   @id @default(cuid())
   staffId   String   @unique
   title     String
-  bodyHtml  String
+  bodyHtml  String   @db.LongText
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -270,7 +270,7 @@ model TributeTestimonial {
   staffId        String
   name           String
   relationship   String
-  tributeHtml    String
+  tributeHtml    String            @db.LongText
   status         TestimonialStatus @default(PENDING)
   submittedAt    DateTime          @default(now())
   reviewedAt     DateTime?
@@ -353,13 +353,13 @@ model RoleAssignment {
 //////////////////////////////////////////////////////
 
 model ResearchGroup {
-  id           String  @id @default(cuid())
+  id           String      @id @default(cuid())
   name         String
   abbreviation String
-  slug         String  @unique
+  slug         String      @unique
   imageUrl     String?
   heroImageUrl String?
-  overview     String?
+  overview     String?     @db.LongText
   focusAreas   FocusArea[]
 
   memberships  ResearchGroupMembership[]
@@ -374,13 +374,13 @@ model ResearchGroup {
 }
 
 model FocusArea {
-  id              String @id @default(cuid())
+  id              String  @id @default(cuid())
   researchGroupId String
   title           String
-  description     String?
+  description     String? @db.Text
 
-  researchGroup       ResearchGroup             @relation(fields: [researchGroupId], references: [id], onDelete: Cascade)
-  staffSelections     StaffFocusAreaSelection[]
+  researchGroup   ResearchGroup             @relation(fields: [researchGroupId], references: [id], onDelete: Cascade)
+  staffSelections StaffFocusAreaSelection[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -421,15 +421,15 @@ model ResearchGroupMembership {
 
 model Publication {
   id       String  @id @default(cuid())
-  title    String
+  title    String  @db.Text
   slug     String  @unique
   doi      String? @unique
   year     Int?
   type     String?
-  abstract String?
-  url      String?
-  authors  String?
-  venue    String?
+  abstract String? @db.LongText
+  url      String? @db.Text
+  authors  String? @db.LongText
+  venue    String? @db.Text
 
   // Homepage rule: pick 1 featured research output per ResearchGroup
   isFeatured Boolean @default(false)
@@ -470,11 +470,11 @@ model ResearchOutput {
   staff   Staff  @relation(fields: [staffId], references: [id], onDelete: Cascade)
 
   type    ResearchOutputType
-  title   String
-  authors String
+  title   String             @db.Text
+  authors String             @db.LongText
   year    Int?
-  venue   String?
-  url     String?
+  venue   String?            @db.Text
+  url     String?            @db.Text
   doi     String?
 
   // APA common fields
@@ -484,8 +484,8 @@ model ResearchOutput {
   sourceTitle String?
   publisher   String?
   language    String?
-  abstract    String?
-  notes       String?
+  abstract    String?   @db.LongText
+  notes       String?   @db.LongText
 
   // Structured JSON
   authorsJson  Json? // array of author objects [{given_name, family_name, …}]
@@ -506,8 +506,8 @@ model Project {
 
   title           String
   acronym         String?
-  descriptionHtml String?
-  url             String?
+  descriptionHtml String? @db.LongText
+  url             String? @db.Text
 
   status    ProjectStatus @default(ONGOING)
   isFunded  Boolean       @default(false)
@@ -540,12 +540,12 @@ model StudentThesis {
   staff   Staff  @relation(fields: [staffId], references: [id], onDelete: Cascade)
 
   year               Int
-  title              String
+  title              String       @db.Text
   studentName        String?
   registrationNumber String?
   programme          String?
   degreeLevel        String?
-  externalUrl        String?
+  externalUrl        String?      @db.Text
   status             ThesisStatus
 
   createdAt DateTime  @default(now())
@@ -582,7 +582,7 @@ model HodAddress {
   staff   Staff  @relation(fields: [staffId], references: [id], onDelete: Cascade)
 
   title String
-  body  String
+  body  String @db.LongText
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -600,18 +600,18 @@ model AcademicProgram {
   slug String @unique
 
   // Sections (UG/PG)
-  overviewProspects       String?
-  admissionRequirements   String?
-  courseRequirements      String?
-  curriculum              String?
-  programmeStructure      String?
-  studyOptionsText        String?
-  courseDescriptionsIntro String?
+  overviewProspects       String? @db.LongText
+  admissionRequirements   String? @db.LongText
+  courseRequirements      String? @db.LongText
+  curriculum              String? @db.LongText
+  programmeStructure      String? @db.LongText
+  studyOptionsText        String? @db.LongText
+  courseDescriptionsIntro String? @db.LongText
 
   // PG accordion blocks for admission/course requirements
   requirementBlocks RequirementBlock[]
 
-  courses Course[]
+  courses      Course[]
   studyOptions ProgramStudyOption[]
 
   createdAt DateTime  @default(now())
@@ -626,10 +626,10 @@ model PgDegreeContent {
   programmeCode ProgrammeCode
   degreeType    DegreeType
 
-  admissionHtml String
-  periodHtml    String
-  courseHtml    String
-  examHtml      String
+  admissionHtml String @db.LongText
+  periodHtml    String @db.LongText
+  courseHtml    String @db.LongText
+  examHtml      String @db.LongText
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -645,7 +645,7 @@ model RequirementBlock {
   degreeType      DegreeType
   requirementType RequirementType
   title           String
-  contentHtml     String
+  contentHtml     String          @db.LongText
   orderIndex      Int             @default(0)
 
   createdAt DateTime  @default(now())
@@ -658,7 +658,7 @@ model RequirementBlock {
 model StudyOption {
   id    String  @id @default(cuid())
   name  String
-  about String
+  about String  @db.LongText
   slug  String? @unique
 
   programs ProgramStudyOption[]
@@ -670,12 +670,12 @@ model StudyOption {
 }
 
 model ProgramStudyOption {
-  id              String        @id @default(cuid())
-  programmeCode   ProgrammeCode // legacy compatibility
-  level           ProgramLevel  // legacy compatibility
+  id                String        @id @default(cuid())
+  programmeCode     ProgrammeCode // legacy compatibility
+  level             ProgramLevel // legacy compatibility
   academicProgramId String
-  studyOptionId   String
-  orderIndex      Int           @default(0)
+  studyOptionId     String
+  orderIndex        Int           @default(0)
 
   academicProgram AcademicProgram @relation(fields: [academicProgramId], references: [id], onDelete: Cascade)
   studyOption     StudyOption     @relation(fields: [studyOptionId], references: [id], onDelete: Cascade)
@@ -692,16 +692,16 @@ model Course {
   id            String  @id @default(cuid())
   code          String  @unique
   title         String
-  description   String?
-  prerequisites String?
+  description   String? @db.LongText
+  prerequisites String? @db.LongText
 
   // L/T/P/U fields (numbers)
-  L Int?
-  T Int?
-  P Int?
-  U Int?
+  L             Int?
+  T             Int?
+  P             Int?
+  U             Int?
   // UG-only year level (1-4). Null for postgraduate courses.
-  yearLevel Int?
+  yearLevel     Int?
   semesterTaken SemesterTaken?
 
   status CourseStatus @default(CORE)
@@ -738,7 +738,7 @@ model News {
   id       String   @id @default(cuid())
   title    String
   slug     String   @unique
-  body     String
+  body     String   @db.LongText
   imageUrl String?
   date     DateTime
 
@@ -746,7 +746,7 @@ model News {
   isFeatured Boolean @default(false)
 
   buttonLabel String?
-  buttonLink  String?
+  buttonLink  String? @db.Text
 
   status      PublishStatus @default(DRAFT)
   publishedAt DateTime?
@@ -766,12 +766,12 @@ model EventOpportunity {
   type                EventOpportunityType
   eventCategory       EventCategory?
   opportunityCategory OpportunityCategory?
-  description         String?
+  description         String?              @db.LongText
   duration            String?
   startDate           DateTime?
   endDate             DateTime?
   venue               String?
-  linkUrl             String?
+  linkUrl             String?              @db.Text
   deadline            DateTime?
 
   status      PublishStatus @default(DRAFT)
@@ -791,7 +791,7 @@ model Spotlight {
   title    String
   date     DateTime?
   imageUrl String?
-  text     String
+  text     String    @db.LongText
 
   status      PublishStatus @default(DRAFT)
   publishedAt DateTime?
@@ -809,7 +809,7 @@ model HistoryEntry {
   date      DateTime
   year      Int
   title     String
-  shortDesc String
+  shortDesc String   @db.Text
 
   status      PublishStatus @default(DRAFT)
   publishedAt DateTime?
@@ -845,7 +845,7 @@ model LegacyGalleryItem {
   id        String  @id @default(cuid())
   mediaUrl  String
   title     String
-  bioText   String
+  bioText   String  @db.LongText
   datesText String? // e.g., "1978–2004"
   year      Int?
 
@@ -865,8 +865,8 @@ model LegacyGalleryItem {
 model ResourceItem {
   id          String  @id @default(cuid())
   title       String
-  description String?
-  link        String
+  description String? @db.Text
+  link        String  @db.Text
   imageUrl    String?
   category    String? // e.g., "Apps", "Documents", "Forms"
 

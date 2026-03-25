@@ -1,0 +1,13 @@
+{
+  "endedAt": "2026-03-25T16:02:32.705Z",
+  "failures": [
+    {
+      "message": "Target has table(s) not covered by ETL plan: , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , . Update scripts/etl/plan.js before rehearsal.",
+      "name": "Error",
+      "stack": "Error: Target has table(s) not covered by ETL plan: , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , . Update scripts/etl/plan.js before rehearsal.\n    at run (/home/io/Sandbox/ife-physics/scripts/etl/rehearsal.js:284:13)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)"
+    }
+  ],
+  "postLoadValidation": {},
+  "startedAt": "2026-03-25T16:02:32.658Z",
+  "tableSummaries": []
+}

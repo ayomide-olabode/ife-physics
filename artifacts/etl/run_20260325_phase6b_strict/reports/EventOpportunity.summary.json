@@ -1,0 +1,9 @@
+{
+  "loadedRows": 5,
+  "preConflictValidRows": 5,
+  "quarantinedRows": 0,
+  "rejects": 0,
+  "sourceRows": 5,
+  "table": "EventOpportunity",
+  "validRows": 5
+}

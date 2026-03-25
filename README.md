@@ -29,7 +29,7 @@ The system supports these major domains:
 
 - **Next.js 16 (App Router)** for routing, layouts, server components, and route handlers.
 - **React 19 + TypeScript** for UI and typed application code.
-- **Prisma + PostgreSQL** for ORM and relational data modeling.
+- **Prisma + MySQL** for ORM and relational data modeling.
 - **NextAuth (credentials provider)** for session-based authentication.
 - **Tailwind CSS + shadcn/ui + Radix UI** for design system and primitives.
 - **Zod** for server-side schema validation of action payloads.
@@ -195,11 +195,132 @@ Some routes are intentionally placeholder at the moment (for example parts of Sp
 
 ## 13. Local development notes
 
-- PostgreSQL runs via `docker-compose.yml`.
+- MySQL runs via `docker-compose.yml`.
 - Prisma client generation runs during `dev`/`build` lifecycle scripts.
+- PostgreSQL-era Prisma migration SQL is archived in `prisma/migrations_postgresql_archive/` and is not part of active lineage.
+- Active migration lineage is a fresh MySQL baseline from current `prisma/schema.prisma`.
 - Environment variables expected include:
   - `DATABASE_URL`
   - `NEXTAUTH_SECRET`
   - `NEXTAUTH_URL`
   - `APP_URL` (used for invite/reset link generation)
 
+## 14. Migration status (PostgreSQL -> MySQL)
+
+- Prisma schema/provider now targets MySQL (`provider = "mysql"`).
+- Active Prisma migration lineage is MySQL-only with baseline migration:
+  - `prisma/migrations/20260325152837_mysql_baseline`
+- PostgreSQL Prisma migrations are archived and inactive:
+  - `prisma/migrations_postgresql_archive/`
+- ETL tooling exists in `scripts/etl/` and strict local rehearsal has passed.
+- Runtime PostgreSQL-specific research raw SQL paths were rewritten for MySQL compatibility:
+  - `src/server/public/queries/researchPublic.ts`
+  - `src/server/queries/researchGroupOutputs.ts`
+  - `src/server/queries/researchGroupPublicationsFromMembers.ts`
+- Open migration decision is policy/governance (not technical): approval of quarantined historical `RoleAssignment` duplicates from ETL conflict-resolution artifacts.
+
+## 15. Manual QA checklist (local + staging)
+
+Use this as the minimum release checklist for migration verification.
+
+| Area | What to do | Expected result | Risk | Where |
+|---|---|---|---|---|
+| Auth login | Test valid/invalid login | Valid auth succeeds, invalid denied cleanly | High | Both |
+| Invite flow | Issue invite, register, retry used token | Single-use behavior enforced | High | Both |
+| Password reset | Request and consume reset token; test expired token | Reset works once; expired token rejected | High | Both |
+| Session role injection | Login as users with different roles/scopes | Session permissions reflect DB roles | High | Both |
+| RBAC global/scoped | Test EDITOR, ACADEMIC_COORDINATOR, RESEARCH_LEAD, SUPER_ADMIN boundaries | Access gates enforced server-side | High | Both |
+| Public research pages | Visit group pages and output listings | No runtime SQL errors; correct data appears | High | Both |
+| Dashboard research outputs | Test group outputs table search/pagination | Stable ordering/filtering and valid counts | High | Both |
+| Publications-from-members | Validate member-linked output list behavior | Results align with `authorsJson.staffId` linkage | High | Both |
+| Search/filter case behavior | Use mixed-case queries across research/news/people/courses | Case behavior acceptable and consistent | Medium | Both |
+| Pagination | Exercise first/middle/last pages for major lists | No missing/duplicate rows across pages | Medium | Both |
+| Content CRUD | Create/edit/publish/archive/delete in communication/content modules | Lifecycle transitions and visibility behave correctly | High | Both |
+| Leadership/governance | Validate leadership terms, HOD data, tribute workflows | Dashboard and public views remain consistent | Medium | Both |
+| Academics | Validate programmes/study options/courses/requirements | Data relations and rendering remain intact | Medium | Both |
+| Audit logs | Trigger mutations and inspect audit entries | Actions and snapshots are persisted | High | Both |
+| Files/images | Verify uploaded image/file URLs still resolve | Relative URL persistence remains valid | Medium | Both |
+| Draft/archived visibility | Check public/dashboard visibility gates | Draft hidden publicly; published/archived semantics preserved | High | Both |
+| MariaDB parity (if used) | Re-run research query paths on MariaDB staging | Functional parity with MySQL staging | High | Staging |
+| JSON query performance | Load-test rewritten research filters on realistic volume | Performance remains acceptable | High | Staging |
+
+## 16. Staging verification plan
+
+1. Provision clean staging MySQL/MariaDB and apply baseline migration:
+   - `npx prisma migrate deploy`
+2. Run ETL with strict settings (non-production credentials only):
+   - `ETL_FAIL_ON_REJECTS=true`
+   - `ETL_REQUIRE_EMPTY_TARGET=true`
+3. Review ETL artifacts before app QA:
+   - `run-summary.json`
+   - `post-load-counts.json`
+   - `reports/rejects/*`
+   - `reports/quarantine/RoleAssignment.ndjson`
+   - `RoleAssignment.conflict-resolution.json`
+4. Run app smoke tests (auth, dashboard access, public homepage, research, people, news).
+5. Run focused regression tests for rewritten research query modules.
+6. If MariaDB staging is used, run explicit parity checks for JSON filtering and case/collation behavior.
+7. Run performance sanity checks for research list/search endpoints.
+8. Capture signoffs from:
+   - data migration reviewer
+   - app QA reviewer
+   - product/governance owner (RoleAssignment quarantine policy)
+
+## 17. Cutover readiness + rollback checklist
+
+### Pre-cutover
+
+- Confirm maintenance window and stakeholder comms.
+- Verify backups:
+  - source PostgreSQL full backup + restore proof
+  - target MySQL/MariaDB pre-cutover snapshot
+- Confirm credential split:
+  - migrate credentials
+  - ETL write credentials
+  - runtime least-privilege credentials
+- Confirm final policy approval for quarantined `RoleAssignment` history.
+
+### Cutover execution
+
+- Apply migrations (`npx prisma migrate deploy`).
+- Execute ETL in approved order with strict validation.
+- Preserve all ETL artifacts outside ephemeral runners.
+- Gate progression on artifact review and smoke-test pass.
+
+### Post-cutover validation
+
+- Run high-risk QA subset: auth/RBAC/research/content lifecycle.
+- Verify key counts and targeted source-vs-target spot checks.
+- Monitor runtime logs and DB health.
+
+### Rollback triggers
+
+- Critical auth or RBAC regression.
+- Data-integrity mismatch beyond approved quarantine policy.
+- Major public research query failures.
+- Severe production performance degradation with no safe hotfix window.
+
+### Rollback plan (high level)
+
+- Repoint app to last known-good PostgreSQL deployment.
+- Keep MySQL target snapshot and ETL artifacts for forensic review.
+- Restore DB state from verified backups if needed.
+- Re-run smoke tests on restored stack before reopening traffic.
+
+## 18. Recommended go/no-go criteria
+
+### Go
+
+- Strict staging ETL completes with only approved quarantines.
+- No critical QA failures in auth, RBAC, research, content lifecycle.
+- MariaDB parity checks pass (if MariaDB is target).
+- Performance sanity checks pass agreed thresholds.
+- Backup and rollback rehearsal evidence is complete.
+- Product owner signs off on quarantine policy.
+
+### No-go
+
+- Unapproved rejects/quarantines or unresolved data-integrity issues.
+- Critical runtime regressions in protected flows.
+- Unresolved engine-parity differences that affect correctness.
+- Missing rollback readiness evidence.

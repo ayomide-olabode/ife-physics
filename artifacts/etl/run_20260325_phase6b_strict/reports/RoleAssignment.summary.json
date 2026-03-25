@@ -1,0 +1,9 @@
+{
+  "loadedRows": 10,
+  "preConflictValidRows": 15,
+  "quarantinedRows": 5,
+  "rejects": 0,
+  "sourceRows": 15,
+  "table": "RoleAssignment",
+  "validRows": 10
+}

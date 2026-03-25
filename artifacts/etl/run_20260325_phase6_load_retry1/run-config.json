@@ -1,0 +1,12 @@
+{
+  "artifactRoot": "/home/io/Sandbox/ife-physics/artifacts/etl",
+  "batchSize": 500,
+  "dryRun": false,
+  "failOnRejects": true,
+  "requireEmptyTarget": true,
+  "runId": "run_20260325_phase6_load_retry1",
+  "sourcePgUrl": "postgresql://postgres:***@localhost:5432/ife_physics?options=-c%20default_transaction_read_only%3Don",
+  "sourceSchema": "public",
+  "startTable": null,
+  "targetMysqlUrl": "mysql://ife_physics:***@localhost:3306/ife_physics"
+}
