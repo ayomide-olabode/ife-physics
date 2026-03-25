@@ -1,0 +1,893 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+//////////////////////////////////////////////////////
+// ENUMS
+//////////////////////////////////////////////////////
+
+enum StaffType {
+  ACADEMIC
+  VISITING
+  EMERITUS
+  TECHNICAL
+  SUPPORT
+}
+
+enum StaffStatus {
+  ACTIVE
+  FORMER
+  RETIRED
+  IN_MEMORIAM
+}
+
+enum ProgramLevel {
+  UNDERGRADUATE
+  POSTGRADUATE
+}
+
+enum ProgrammeCode {
+  PHY
+  EPH
+  SLT
+}
+
+enum ProgrammeScope {
+  GENERAL
+  PHY
+  EPH
+  SLT
+}
+
+enum DegreeScope {
+  GENERAL
+  UNDERGRADUATE
+  POSTGRADUATE
+}
+
+enum DegreeType {
+  BSC
+  MSC
+  MPHIL
+  PHD
+}
+
+enum RequirementType {
+  ADMISSION
+  COURSE
+}
+
+enum CourseStatus {
+  CORE
+  RESTRICTED
+}
+
+enum SemesterTaken {
+  HARMATTAN
+  RAIN
+}
+
+enum ScopedRole {
+  // Global role (multiple users allowed)
+  ACADEMIC_COORDINATOR
+
+  // Scoped per ResearchGroup (per-group owners; enforce max 2 via app logic)
+  RESEARCH_LEAD
+
+  // Global role (single role covering Communications + Content; multiple users allowed)
+  EDITOR
+}
+
+enum ScopeType {
+  GLOBAL
+  RESEARCH_GROUP
+}
+
+enum EmailTokenType {
+  INVITE
+  PASSWORD_RESET
+}
+
+enum PublishStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum LeadershipRole {
+  HOD
+  ACADEMIC_COORDINATOR
+}
+
+enum ResearchOutputType {
+  BOOK
+  BOOK_CHAPTER
+  CONFERENCE_PAPER
+  DATA
+  JOURNAL_ARTICLE
+  MONOGRAPH
+  OTHER
+  PATENT
+  REPORT
+  SOFTWARE
+  THESIS
+}
+
+enum ThesisStatus {
+  ONGOING
+  COMPLETED
+  DISCONTINUED
+}
+
+enum ProjectStatus {
+  COMPLETED
+  DISCONTINUED
+  ONGOING
+}
+
+enum EventOpportunityType {
+  EVENT
+  OPPORTUNITY
+}
+
+enum EventCategory {
+  SEMINAR
+  LECTURE
+  COLLOQUIUM
+  WORKSHOP
+  TRAINING
+  THESIS_DEFENSE
+  CONFERENCE
+  SYMPOSIUM
+  SCHOOL
+  MEETING
+  SOCIAL
+  OUTREACH
+  COMPETITION
+}
+
+enum OpportunityCategory {
+  GRANT
+  FUNDING
+  FELLOWSHIP
+  SCHOLARSHIP
+  JOBS
+  INTERNSHIPS
+  EXCHANGE
+  COLLABORATION
+}
+
+enum TestimonialStatus {
+  PENDING
+  APPROVED
+  DECLINED
+}
+
+//////////////////////////////////////////////////////
+// STAFF & AUTHENTICATION
+//////////////////////////////////////////////////////
+
+model SecondaryAffiliation {
+  id          String  @id @default(cuid())
+  name        String
+  acronym     String?
+  description String?
+
+  staff Staff[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([name])
+  @@index([acronym])
+}
+
+model Staff {
+  id                 String  @id @default(cuid())
+  firstName          String?
+  middleName         String?
+  lastName           String?
+  title              String?
+  institutionalEmail String  @unique
+
+  staffType              StaffType
+  staffStatus            StaffStatus           @default(ACTIVE)
+  secondaryAffiliationId String?
+  secondaryAffiliation   SecondaryAffiliation? @relation(fields: [secondaryAffiliationId], references: [id], onDelete: SetNull)
+
+  // Visiting faculty
+  visitStartDate DateTime?
+  visitEndDate   DateTime?
+
+  // Academic/faculty fields
+  academicRank    String?
+  designation     String?
+  researchArea    String?
+  roomNumber      String?
+  academicLinkUrl String?
+
+  // Technical/Support fields
+  operationalUnit String?
+  areaOfExpertise String?
+
+  phoneNumber       String?
+  bio               String?
+  education         String?
+  researchInterests String?
+  membershipOfProfessionalOrganizations String?
+  profileImageUrl   String?
+  dateOfBirth       DateTime?
+  dateOfDeath       DateTime?
+  isInMemoriam      Boolean @default(false)
+  isPublicProfile   Boolean @default(true)
+
+  user        User?
+  emailTokens EmailToken[]
+
+  // Relations
+  researchMemberships   ResearchGroupMembership[]
+  focusAreaSelections   StaffFocusAreaSelection[]
+  publicationAuthorship PublicationAuthor[]
+
+  researchOutputs  ResearchOutput[]
+  projects         Project[]
+  teaching         TeachingResponsibility[]
+  thesesSupervised StudentThesis[]
+  tribute          DepartmentalTribute?
+  testimonials     TributeTestimonial[]
+
+  leadershipTerms LeadershipTerm[]
+  hodAddress      HodAddress?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([staffStatus])
+  @@index([staffType])
+  @@index([isPublicProfile])
+  @@index([secondaryAffiliationId])
+}
+
+model DepartmentalTribute {
+  id        String   @id @default(cuid())
+  staffId   String   @unique
+  title     String
+  bodyHtml  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  staff Staff @relation(fields: [staffId], references: [id], onDelete: Cascade)
+}
+
+model TributeTestimonial {
+  id             String            @id @default(cuid())
+  staffId        String
+  name           String
+  relationship   String
+  tributeHtml    String
+  status         TestimonialStatus @default(PENDING)
+  submittedAt    DateTime          @default(now())
+  reviewedAt     DateTime?
+  reviewerUserId String?
+  declineReason  String?
+
+  staff Staff @relation(fields: [staffId], references: [id], onDelete: Cascade)
+
+  @@index([staffId, status, submittedAt])
+}
+
+model User {
+  id      String @id @default(cuid())
+  staffId String @unique
+  staff   Staff  @relation(fields: [staffId], references: [id], onDelete: Cascade)
+
+  passwordHash String
+  isSuperAdmin Boolean @default(false)
+
+  roleAssignments RoleAssignment[]
+  auditLogs       AuditLog[]       @relation("ActorAuditLogs")
+  emailTokens     EmailToken[]
+
+  lastLoginAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model EmailToken {
+  id         String         @id @default(cuid())
+  type       EmailTokenType
+  email      String
+  userId     String?
+  staffId    String?
+  tokenHash  String         @unique
+  expiresAt  DateTime
+  usedAt     DateTime?
+  lastSentAt DateTime?
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+
+  user  User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
+  staff Staff? @relation(fields: [staffId], references: [id], onDelete: SetNull)
+
+  @@index([email, type])
+  @@index([expiresAt])
+}
+
+//////////////////////////////////////////////////////
+// RBAC SYSTEM
+//////////////////////////////////////////////////////
+
+model RoleAssignment {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  role           ScopedRole
+  scopeType      ScopeType
+  scopeId        String? // REQUIRED when scopeType=RESEARCH_GROUP (enforced in app logic)
+  programmeScope ProgrammeScope?
+  degreeScope    DegreeScope?
+
+  expiresAt DateTime?
+  deletedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Prevent duplicates (same user assigned same role to same scope twice)
+  @@unique([userId, role, scopeType, scopeId])
+  @@index([userId])
+  @@index([role, scopeType, scopeId])
+  @@index([role, programmeScope, degreeScope])
+  @@index([userId, role, deletedAt])
+}
+
+//////////////////////////////////////////////////////
+// RESEARCH DOMAIN
+//////////////////////////////////////////////////////
+
+model ResearchGroup {
+  id           String  @id @default(cuid())
+  name         String
+  abbreviation String
+  slug         String  @unique
+  imageUrl     String?
+  heroImageUrl String?
+  overview     String?
+  focusAreas   FocusArea[]
+
+  memberships  ResearchGroupMembership[]
+  publications Publication[]
+
+  featuredResearchOutputId String?
+  featuredResearchOutput   ResearchOutput? @relation("GroupFeatured", fields: [featuredResearchOutputId], references: [id])
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
+
+model FocusArea {
+  id              String @id @default(cuid())
+  researchGroupId String
+  title           String
+  description     String?
+
+  researchGroup       ResearchGroup             @relation(fields: [researchGroupId], references: [id], onDelete: Cascade)
+  staffSelections     StaffFocusAreaSelection[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([researchGroupId])
+  @@index([deletedAt])
+}
+
+model StaffFocusAreaSelection {
+  id          String @id @default(cuid())
+  staffId     String
+  focusAreaId String
+
+  staff     Staff     @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  focusArea FocusArea @relation(fields: [focusAreaId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([staffId, focusAreaId])
+  @@index([staffId])
+  @@index([focusAreaId])
+}
+
+model ResearchGroupMembership {
+  id              String @id @default(cuid())
+  staffId         String
+  researchGroupId String
+
+  staff         Staff         @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  researchGroup ResearchGroup @relation(fields: [researchGroupId], references: [id], onDelete: Cascade)
+
+  joinedAt DateTime?
+  leftAt   DateTime?
+
+  @@unique([staffId, researchGroupId])
+}
+
+model Publication {
+  id       String  @id @default(cuid())
+  title    String
+  slug     String  @unique
+  doi      String? @unique
+  year     Int?
+  type     String?
+  abstract String?
+  url      String?
+  authors  String?
+  venue    String?
+
+  // Homepage rule: pick 1 featured research output per ResearchGroup
+  isFeatured Boolean @default(false)
+
+  researchGroupId String
+  researchGroup   ResearchGroup @relation(fields: [researchGroupId], references: [id])
+
+  authorEntries PublicationAuthor[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([year])
+  @@index([researchGroupId, isFeatured])
+}
+
+model PublicationAuthor {
+  id            String  @id @default(cuid())
+  publicationId String
+  staffId       String?
+  externalName  String?
+  authorOrder   Int
+
+  publication Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
+  staff       Staff?      @relation(fields: [staffId], references: [id])
+
+  @@unique([publicationId, authorOrder])
+}
+
+//////////////////////////////////////////////////////
+// PEOPLE: OUTPUTS / PROJECTS / TEACHING / THESES
+//////////////////////////////////////////////////////
+
+model ResearchOutput {
+  id      String @id @default(cuid())
+  staffId String
+  staff   Staff  @relation(fields: [staffId], references: [id], onDelete: Cascade)
+
+  type    ResearchOutputType
+  title   String
+  authors String
+  year    Int?
+  venue   String?
+  url     String?
+  doi     String?
+
+  // APA common fields
+  groupAuthor String?
+  fullDate    DateTime?
+  subtitle    String?
+  sourceTitle String?
+  publisher   String?
+  language    String?
+  abstract    String?
+  notes       String?
+
+  // Structured JSON
+  authorsJson  Json? // array of author objects [{given_name, family_name, …}]
+  keywordsJson Json? // array of strings
+  metaJson     Json? // type-specific fields (volume, issue, pages, etc.)
+
+  featuredByGroups ResearchGroup[] @relation("GroupFeatured")
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
+
+model Project {
+  id      String @id @default(cuid())
+  staffId String
+  staff   Staff  @relation(fields: [staffId], references: [id], onDelete: Cascade)
+
+  title           String
+  acronym         String?
+  descriptionHtml String?
+  url             String?
+
+  status    ProjectStatus @default(ONGOING)
+  isFunded  Boolean       @default(false)
+  startYear Int           @default(2025)
+  endYear   Int?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
+
+model TeachingResponsibility {
+  id      String @id @default(cuid())
+  staffId String
+  staff   Staff  @relation(fields: [staffId], references: [id], onDelete: Cascade)
+
+  courseCode  String?
+  title       String
+  sessionYear Int? // e.g., 2025
+  semester    String? // e.g., "Harmattan"
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
+
+model StudentThesis {
+  id      String @id @default(cuid())
+  staffId String
+  staff   Staff  @relation(fields: [staffId], references: [id], onDelete: Cascade)
+
+  year               Int
+  title              String
+  studentName        String?
+  registrationNumber String?
+  programme          String?
+  degreeLevel        String?
+  externalUrl        String?
+  status             ThesisStatus
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
+
+//////////////////////////////////////////////////////
+// LEADERSHIP (HOD / COORDINATORS)
+//////////////////////////////////////////////////////
+
+model LeadershipTerm {
+  id      String @id @default(cuid())
+  staffId String
+  staff   Staff  @relation(fields: [staffId], references: [id], onDelete: Cascade)
+
+  role      LeadershipRole
+  startDate DateTime
+  endDate   DateTime?
+
+  // Optional: if you want to tag academic coordinators by programme for display,
+  // without making them "owners" in RBAC:
+  programmeCode ProgrammeCode?
+
+  createdAt DateTime @default(now())
+
+  @@index([role, endDate])
+  @@index([programmeCode])
+}
+
+model HodAddress {
+  id      String @id @default(cuid())
+  staffId String @unique
+  staff   Staff  @relation(fields: [staffId], references: [id], onDelete: Cascade)
+
+  title String
+  body  String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+//////////////////////////////////////////////////////
+// ACADEMIC DOMAIN (PHY/EPH/SLT UG/PG)
+//////////////////////////////////////////////////////
+
+model AcademicProgram {
+  id            String        @id @default(cuid())
+  programmeCode ProgrammeCode
+  level         ProgramLevel
+
+  slug String @unique
+
+  // Sections (UG/PG)
+  overviewProspects       String?
+  admissionRequirements   String?
+  courseRequirements      String?
+  curriculum              String?
+  programmeStructure      String?
+  studyOptionsText        String?
+  courseDescriptionsIntro String?
+
+  // PG accordion blocks for admission/course requirements
+  requirementBlocks RequirementBlock[]
+
+  courses Course[]
+  studyOptions ProgramStudyOption[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@unique([programmeCode, level])
+}
+
+model PgDegreeContent {
+  id            String        @id @default(cuid())
+  programmeCode ProgrammeCode
+  degreeType    DegreeType
+
+  admissionHtml String
+  periodHtml    String
+  courseHtml    String
+  examHtml      String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([programmeCode, degreeType])
+}
+
+model RequirementBlock {
+  id        String          @id @default(cuid())
+  programId String
+  program   AcademicProgram @relation(fields: [programId], references: [id], onDelete: Cascade)
+
+  degreeType      DegreeType
+  requirementType RequirementType
+  title           String
+  contentHtml     String
+  orderIndex      Int             @default(0)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([programId, degreeType, requirementType])
+}
+
+model StudyOption {
+  id    String  @id @default(cuid())
+  name  String
+  about String
+  slug  String? @unique
+
+  programs ProgramStudyOption[]
+  courses  CourseOnStudyOption[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
+
+model ProgramStudyOption {
+  id              String        @id @default(cuid())
+  programmeCode   ProgrammeCode // legacy compatibility
+  level           ProgramLevel  // legacy compatibility
+  academicProgramId String
+  studyOptionId   String
+  orderIndex      Int           @default(0)
+
+  academicProgram AcademicProgram @relation(fields: [academicProgramId], references: [id], onDelete: Cascade)
+  studyOption     StudyOption     @relation(fields: [studyOptionId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([programmeCode, level, studyOptionId])
+  @@unique([academicProgramId, studyOptionId])
+  @@index([academicProgramId])
+  @@index([studyOptionId])
+}
+
+model Course {
+  id            String  @id @default(cuid())
+  code          String  @unique
+  title         String
+  description   String?
+  prerequisites String?
+
+  // L/T/P/U fields (numbers)
+  L Int?
+  T Int?
+  P Int?
+  U Int?
+  // UG-only year level (1-4). Null for postgraduate courses.
+  yearLevel Int?
+  semesterTaken SemesterTaken?
+
+  status CourseStatus @default(CORE)
+
+  programId String
+  program   AcademicProgram @relation(fields: [programId], references: [id], onDelete: Cascade)
+
+  studyOptions CourseOnStudyOption[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([programId])
+  @@index([yearLevel])
+  @@index([semesterTaken])
+}
+
+model CourseOnStudyOption {
+  courseId      String
+  studyOptionId String
+
+  course      Course      @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  studyOption StudyOption @relation(fields: [studyOptionId], references: [id], onDelete: Cascade)
+
+  @@id([courseId, studyOptionId])
+}
+
+//////////////////////////////////////////////////////
+// COMMUNICATIONS + CONTENT (Editor-managed)
+//////////////////////////////////////////////////////
+
+model News {
+  id       String   @id @default(cuid())
+  title    String
+  slug     String   @unique
+  body     String
+  imageUrl String?
+  date     DateTime
+
+  // Homepage hero carousel: 4 featured news
+  isFeatured Boolean @default(false)
+
+  buttonLabel String?
+  buttonLink  String?
+
+  status      PublishStatus @default(DRAFT)
+  publishedAt DateTime?
+  archivedAt  DateTime?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([isFeatured, date])
+  @@index([status])
+}
+
+model EventOpportunity {
+  id                  String               @id @default(cuid())
+  title               String
+  type                EventOpportunityType
+  eventCategory       EventCategory?
+  opportunityCategory OpportunityCategory?
+  description         String?
+  duration            String?
+  startDate           DateTime?
+  endDate             DateTime?
+  venue               String?
+  linkUrl             String?
+  deadline            DateTime?
+
+  status      PublishStatus @default(DRAFT)
+  publishedAt DateTime?
+  archivedAt  DateTime?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([type, deadline])
+  @@index([status])
+}
+
+model Spotlight {
+  id       String    @id @default(cuid())
+  title    String
+  date     DateTime?
+  imageUrl String?
+  text     String
+
+  status      PublishStatus @default(DRAFT)
+  publishedAt DateTime?
+  archivedAt  DateTime?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([status])
+}
+
+model HistoryEntry {
+  id        String   @id @default(cuid())
+  date      DateTime
+  year      Int
+  title     String
+  shortDesc String
+
+  status      PublishStatus @default(DRAFT)
+  publishedAt DateTime?
+  archivedAt  DateTime?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([date])
+  @@index([year])
+  @@index([status])
+}
+
+model RollOfHonourEntry {
+  id                 String  @id @default(cuid())
+  imageUrl           String?
+  name               String // legacy full name for backward compatibility
+  firstName          String
+  middleName         String?
+  lastName           String
+  registrationNumber String
+  programme          String // display string ("PHY", etc.)
+  cgpa               Float
+  graduatingYear     Int
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
+
+model LegacyGalleryItem {
+  id        String  @id @default(cuid())
+  mediaUrl  String
+  title     String
+  bioText   String
+  datesText String? // e.g., "1978–2004"
+  year      Int?
+
+  status      PublishStatus @default(DRAFT)
+  publishedAt DateTime?
+  archivedAt  DateTime?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
+
+//////////////////////////////////////////////////////
+// RESOURCES
+//////////////////////////////////////////////////////
+
+model ResourceItem {
+  id          String  @id @default(cuid())
+  title       String
+  description String?
+  link        String
+  imageUrl    String?
+  category    String? // e.g., "Apps", "Documents", "Forms"
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
+
+//////////////////////////////////////////////////////
+// AUDIT SYSTEM
+//////////////////////////////////////////////////////
+
+model AuditLog {
+  id      String  @id @default(cuid())
+  actorId String?
+  actor   User?   @relation("ActorAuditLogs", fields: [actorId], references: [id])
+
+  action     String
+  entityType String
+  entityId   String
+  snapshot   Json
+
+  createdAt DateTime @default(now())
+}
